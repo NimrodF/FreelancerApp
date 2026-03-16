@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { fmt } from '../utils/formatters';
 import {
   ANNUAL_PENSION,
@@ -67,6 +68,41 @@ const FIXED_VALUES = [
   },
 ];
 
+function FormattedInput({ field, value, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const displayValue = editing
+    ? draft
+    : field.decimal ? String(value) : fmt(value);
+
+  const handleFocus = () => {
+    setDraft(String(value));
+    setEditing(true);
+  };
+
+  const handleBlur = () => {
+    onChange(field.key, draft);
+    setEditing(false);
+  };
+
+  const handleChange = (e) => {
+    setDraft(e.target.value);
+  };
+
+  return (
+    <input
+      type='text'
+      inputMode='decimal'
+      value={displayValue}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onChange={handleChange}
+      className='input-number'
+    />
+  );
+}
+
 export default function InputPanel({ inputs, onChange }) {
   return (
     <div className='input-panel'>
@@ -85,15 +121,7 @@ export default function InputPanel({ inputs, onChange }) {
               onChange={(e) => onChange(f.key, Number(e.target.value))}
             />
             <div className='input-value-wrap'>
-              <input
-                type='text'
-                inputMode='decimal'
-                min={f.min}
-                max={f.max}
-                value={String(inputs[f.key])}
-                onChange={(e) => onChange(f.key, e.target.value)}
-                className='input-number'
-              />
+              <FormattedInput field={f} value={inputs[f.key]} onChange={onChange} />
               {f.suffix && <span className='input-suffix'>{f.suffix}</span>}
             </div>
           </div>
